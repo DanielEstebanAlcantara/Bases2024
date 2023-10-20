@@ -664,8 +664,14 @@ create table trabajador.domicilio(
 ------------------------------------------------------------------------------------------------------
 --14 En la tabla puesto agregue el valor por default (DF_parentescoVigente) vigente en 1
 --León Ruiz Eduardo
-ALTER TABLE PUESTO 
+ALTER TABLE catalo.PUESTO 
 ADD CONSTRAINT DF_parentescoVigente DEFAULT '1' FOR vigente;
+
+------------------------------------------------------------------------------------------------------
+
+--15. Borrar el constraint DF_parentescoVigente de la tabla puesto
+ALTER TABLE catalo.puesto DROP CONSTRAINT DF_parentescoVigente;
+
 
 ------------------------------------------------------------------------------------------------------
 --Actividad 16. Modifique la columna correo de la tabla empleado a obligatoria
@@ -675,12 +681,13 @@ alter table trabajador.empleado
 
 --indica que columna de esa tabla se va a modificar
 alter column correo varchar(70)  not null;  
-
+-- error sería alter column correo  not null; -- se necesita el tipo de dato al cambairlo 
 ------------------------------------------------------------------------------------------------------
 /*
     17) Agregue la columna fecha de nacimiento y edad a  la tabla empleado con tipo 
     de dato date y char de 2 respectivamente ambos opcionales los valores de dominio 
-    de edad son del 0 al 9
+    de edad son del 0 al 9}
+     -- enunciado que puede estar en el examen 
     
     Beltrán Hernández Nathan
 */
@@ -693,8 +700,10 @@ alter table trabajador.empleado
 add edad char (2)  null CHECK (edad IS NULL OR edad BETWEEN '0' AND '9');
 
 ------------------------------------------------------------------------------------------------------
---Actividad 18. Borrar la columna genero de la tabla oleemdao
+--Actividad 18. Borrar la columna genero de la tabla empleado
 -- Melchor Flores Daniel
+alter table trabajador.empleado DROP CONSTRAINT ck_genero; -- primero borrar check en el hijo
+
 alter table trabajador.empleado
 drop column genero;
 /*
@@ -703,18 +712,23 @@ Vazquez Apolonio Armando
 */
 ALTER TABLE trabajador.empleado ADD genero char(1) CONSTRAINT ck_genero check(genero in ('M','H'))--Vazquez Apolonio Armando.
 
+--------------------------------------------------------------------------
+
 --ACTIVIDAD 20. Crea índice a la tabla empleado para los apellidos (idx_apellidos)
 --Sanchez Diaz Daniel
 CREATE INDEX idx_apellidos
-ON trabajador.empleado(paterno,materno);
+ON trabajador.empleado(paterno,materno);-- En el índice se debe tener en cuenta la estructura del indice 
 
 --EJERCICIO 21
+--------------------------------------------------------------------------
 --Crea índice (idx_puesto) a la tabla definitivo del puesto
 --RICARDO DIAZ
 
 CREATE INDEX idx_puesto ON 
-catalogo.puesto(id_puesto);
+catalogo.puesto(descripcion);-- hacerlo con la descripción
+-- No cluster 
 
+--------------------------------------------------------------------------
 --EJERCICIO 22 
 --Crear Tabla Dependiente como entidad débil
 --por existencia de empleado definitivo
@@ -722,18 +736,23 @@ catalogo.puesto(id_puesto);
 --Vazquez Muñoz 
 --Munguia Lopez 
 CREATE TABLE Dependiente (
-  id_dependiente tinyint, nombre varchar (30), paterno varchar (30).
-  materno varchar (39), id _empleado smallint not null, CONSTRAINT fk_id_empleado foreign key (id_empleado)
+  id_dependiente tinyint, nombre varchar (30),
+  paterno varchar (30),
+  materno varchar (39), 
+  id _empleado smallint not null, 
+  CONSTRAINT fk_id_empleado foreign key (id_empleado)
   REFERENCES trabajador empleado (id _empleado),
-  CONSTRAINT pk_id _dependiente primary key (id empleado,id dependiente)
+  CONSTRAINT pk_id _dependiente primary key (id_empleado, id_dependiente)
   );
   
+-----------------------------------------------  
  ---- Ejercicio 23 
  -- crear la columna adeudoC persistente que obtenga la diferencia (costo-total_pagado)
  -- Ponce Diez Marina Raymundo
 ALTER TABLE proyecto.proyecto ADD
-adeudoC as (costo - total_pagado) PERSISTED; 
-  
+adeudoC  as (costo - total_pagado) PERSISTED; 
+
+-----------------------------------------------  
 --EJERCICIO 24.
 /*
 Implementa histórico de puestos que han tenido los empleados definitivos, bajo el
@@ -796,7 +815,7 @@ go
 /* 26. Implemente la relación entre parentesco y la tabla dependiente (on delete cascade)
 	
 */
-ALTER TABLE parentesco ADD CONSTRAINT fk_dependiente (idDependiente) ON DELETE CASCADE;
+ALTER TABLE parentesco ADD CONSTRAINT fk_dependiente (idDependiente)REFERENCES Dependiente (id_empleado) ON DELETE CASCADE;
 
 
 /*27 Borrar la tabla parentesco
