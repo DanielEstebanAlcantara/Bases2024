@@ -206,7 +206,7 @@ GO
 select * from trabajador.EMPLEADO
 
 
-DBCC CHECKIDENT ('trabajador.EMPLEADO', RESEED,2);
+DBCC CHECKIDENT ('trabajador.EMPLEADO', RESEED,1);-- se tiene que ejecutar las veces necesarias hasta que ponga el valor que se pone
 go
 
 
@@ -242,18 +242,42 @@ begin tran
 
 --3.	Registre a los empleados definitivos, los cuales tienen el siguiente curp (ISDF850423NHRQSD34, EURM920113D3N23DFR, AARF920113D3MSD45Y).  (alumnos)
 --Aguilar García Paola.
+/*
+Para ingresar en definitivo, primero debe estar en empleado 
+*/
+
+/*Primero verificar si el CURP ya existe */
+
+select * from trabajador.empleado
+where curp in ('ISDF850423NHRQSD34', 'EURM920113D3N23DFR', 'AARF920113D3MSD45Y')
+--si se fueron haciendo todas las inserciones ya existen esos curps
+
+
+
 select id_empleado, id_empledoJefe, id_puesto
-                                                                                                                                                                                                                                                                                                                                                  
+
 from empleado.definitivo
 where id_empleado, id_puesto IS NOT NULL
 
-insert into trabajador.definitivo (CURP, id_empleadoJefe, antiguedad_años, id_empleado, id_puesto)
-values ('ISDF850423NHRQSD34', NULL, 3, 34567, 'JEFE DE UNIDAD'),
-	( 'EURM920113D3N23DFR', 1, 2, 78162, 'PROJECT MANAGER'),
-	( 'AARF92011303MSD45Y', 1, 3, 33091, 'DESARROLLADOR SENIOR');
+-- para ver los valores a poner en id_puesto
+select * from catalo.puesto
+
+--- verificar los id de los empleados que ya existen 
+-- consultar las tablas que tienen las demas fk's y ponerlas conforme aparecen 
+insert into trabajador.definitivo (id_empleado, id_empleadoJefe, antiguedad_años, id_puesto,numEmpleado )
+values (2, null, 5, 2, '55980'),-- jefe de unidad 
+	(3,2,4,3, '34500'), -- tester
+	( 21,2, 2, 6, '34340');--analista 
+
+select * from trabajador.definitivo
 
 --4.	Registre a los empleados becarios, los perfiles son A-analista, D-desarrollador, B-bases de datos. (CESAR AGRUILAR COLIN, XIMENA ALCANTARA MARROQUIN, ALEJANDRA BAENA AGUIRRE)
 --Alcantara Paleo Daniel Esteabn
+
+-- Insertar primero en empleado 
+-- primero consultar si esos empleados ya existen 
+select * from trabajador.empleado 
+where nombre = 'CESAR' and paterno = 'AGRUILAR' AND materno = 'COLIN';-- obtener su id, en caso de que exista hacer para cada empleado 
 
 
 select id_empleado from trabajador.EMPLEADO 
