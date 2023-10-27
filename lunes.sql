@@ -786,18 +786,20 @@ nota: el indice de la pk como NONCLUSTERED
 ---Medrano Miranda Daniel Ulises
 
 begin tran
-CREATE TABLE trabajador.historico_puesto(
-    id_historico	smallint	not null,
-	id_puesto		tinyint		not null,
-	fecha_desde		date		not null,
-	fecha_hasta		date		null
+	CREATE TABLE trabajador.historico_puesto(
+		id_historico	smallint	not null,
+		id_puesto		tinyint		not null,
+		fecha_desde		date		not null,
+		fecha_hasta		date		null,
+		id_empleado		smallint    not null,
+		CONSTRAINT pk_historico PRIMARY KEY NONCLUSTERED (id_historico), 
+		CONSTRAINT fk_puesto    FOREIGN KEY (id_puesto) REFERENCES catalogo.puesto(id_puesto),
+		constraint fk_definitvo foreign key (id_Empleado) references trabajador.definitivo (id_empleado),
+	)
 
-    CONSTRAINT pk_historico PRIMARY KEY NONCLUSTERED (id_historico), 
-    CONSTRAINT fk_puesto    FOREIGN KEY (id_puesto) REFERENCES catalogo.puesto(id_puesto)
-)
-go
-rollback tran
----commit tran
+commit tran	
+
+-- DROP TABLE trabajador.historico_puesto --pq se hizo mal al principio
 
 
 /* 	
@@ -806,7 +808,7 @@ rollback tran
 		Lara Aguilar Christian Abraham
 */
 CREATE TABLE catalogo.parentesco(
-	idParentesco	tinyint	NOT NULL identity(1,1),
+	idParentesco	tinyint	NOT NULL identity(1,1),-- no más de 250 parentescos 
 	descripcion	varchar(45)	NOT NULL
 	CONSTRAINT pk_parentesco PRIMARY KEY CLUSTERED (idParentesco)
 )
@@ -815,11 +817,26 @@ go
 /* 26. Implemente la relación entre parentesco y la tabla dependiente (on delete cascade)
 	
 */
-ALTER TABLE parentesco ADD CONSTRAINT fk_dependiente (idDependiente)REFERENCES Dependiente (id_empleado) ON DELETE CASCADE;
+--- CREAR EN DEPENDIENTE EL ATRIBUTO QUE RECIBE LA KF
+ALTER TABLE dependiente
+add column idParentesco tinyint NOT NULL 
+
 
 
 /*27 Borrar la tabla parentesco
 Moreno Ramos Eduardo Jair*/
-BEGIN TRANSACTION;  
-DROP TABLE catalogo.parentesco
-ROLLBACK;
+
+--borrar el constraint
+alter table dependiente drop constraint fk_parentesco;
+  
+DROP TABLE catalogo.parentesco-- pero spriemro se tiene que quitar el constraint con el que hace eferencia 
+
+
+-- volver a crear el constraint (crear tabla y despues agregar constraint )
+ALTER TABLE dependiente ADD CONSTRAINT fk_parentesco FOREIGN KEY (idParentesco)REFERENCES catalogo.parentesco(id_parentesco) ON DELETE CASCADE;
+
+
+--- Para el diagrama solo tomar captura
+
+
+
